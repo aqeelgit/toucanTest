@@ -71,7 +71,7 @@ class Game:
                 self.player2.is_active = True
                 return "Fantastic! Player 2 has joined the table. Let the fun begin!"
             else:
-                return "Heads up: Player 2 is already seated, no worries—we're all set!"
+                return "Heads up: Player 2 is already seated, no worries—we're all set!" 
         else:
             # Normally shouldn't happen if caller ensures valid inputs
             return "Something went wrong. Please enter '1' or '2' only."
