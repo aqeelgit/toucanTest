@@ -79,7 +79,7 @@ class Game:
     def get_active_players(self):
         """
         Gathers a human-readable list of all currently seated players.
-        Returns:
+        Returns: 
             list of str: e.g., ["Player 1"] or ["Player 1", "Player 2"].
         """
         active = []
