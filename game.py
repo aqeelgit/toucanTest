@@ -30,7 +30,7 @@ class Player:
         self.player_id = player_id
         self.is_active = False
 
-    def __str__(self):
+    def __str__(self):  
         """
         Returns a user-friendly string describing the player's status.
         """
