@@ -4,13 +4,11 @@ Combines:
   - User Story #001: "Enter the Game"
   - User Story #002: "Shuffle the Deck"
 
-Features so far:
-  1. Players can 'take a seat' (become active).
-  2. We can create a standard 52-card deck (K..A).
-  3. We can shuffle the deck and confirm it's ready.
-  4. The program handles input errors politely and won't crash.
+Enhanced to ensure:
+  - If a user tries to shuffle before creating a deck, 
+    the code gracefully handles it with a kind message.
 
-Note: Future stories (like dealing cards, trick-taking, scoring) can be added later.
+Note: Future stories (like dealing cards, scoring, etc.) can be added later.
 """
 
 import random
@@ -25,9 +23,6 @@ class Card:
         self.rank = rank
 
     def __str__(self):
-        """
-        Returns a user-friendly string, like "K of Hearts".
-        """
         return f"{self.rank} of {self.suit}"
 
 class Player:
@@ -104,6 +99,7 @@ class Game:
         ranks = ["K", "Q", "J", "10", "9", "8", "7", "6", "5", "4", "3", "2", "A"]
 
         self.deck = [Card(suit, rank) for suit in suits for rank in ranks]
+        print("\nA fresh deck of 52 cards has been created! Ranks K..A, suits Hearts/Diamonds/Clubs/Spades.")
 
     def shuffle_deck(self):
         """
@@ -111,7 +107,8 @@ class Game:
         Prints a friendly confirmation or warns if no deck is created.
         """
         if not self.deck:
-            print("\nOops! There's no deck to shuffle. Create one first (option 3).")
+            print("\nUh oh! There’s no deck to shuffle yet.")
+            print("Try creating one first by choosing option [3]!")
             return
 
         random.shuffle(self.deck)
@@ -122,7 +119,7 @@ def main():
     Main program flow (console-based):
       1. Players can seat themselves (User Story #001).
       2. We can create a deck and shuffle it (User Story #002).
-      3. Error handling for invalid inputs, duplicates, etc.
+      3. If user tries to shuffle an empty deck, we kindly remind them to create one first.
     """
     game = Game()
 
@@ -139,12 +136,10 @@ def main():
 
         user_input = input("Your choice: ").strip()
 
-        # Quit the program
         if user_input.lower() == 'q':
             print("\nNo worries—thanks for stopping by! See you next time!")
             break
 
-        # Seat players
         elif user_input in ('1', '2'):
             result = game.seat_player(user_input)
             print(f"\n{result}")
@@ -155,16 +150,12 @@ def main():
             else:
                 print("No one is seated at the table yet.")
 
-        # Create deck
         elif user_input == '3':
             game.create_deck()
-            print("\nA fresh deck of 52 cards has been created! Ranks K..A, suits Hearts/Diamonds/Clubs/Spades.")  
 
-        # Shuffle deck
         elif user_input == '4':
             game.shuffle_deck()
 
-        # Handle invalid menu input
         else:
             print("\nThat choice doesn't ring a bell.")
             print("Try '1', '2', '3', '4', or 'Q' to quit. You'll get the hang of it!")
