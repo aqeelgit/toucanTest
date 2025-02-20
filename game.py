@@ -158,7 +158,7 @@ def main():
         # Create deck
         elif user_input == '3':
             game.create_deck()
-            print("\nA fresh deck of 52 cards has been created! Ranks K..A, suits Hearts/Diamonds/Clubs/Spades.")
+            print("\nA fresh deck of 52 cards has been created! Ranks K..A, suits Hearts/Diamonds/Clubs/Spades.")  
 
         # Shuffle deck
         elif user_input == '4':
