@@ -1,14 +1,17 @@
 """
-Toucan Card Game (Partial Implementation)
-Combines:
-  - User Story #001: "Enter the Game"
-  - User Story #002: "Shuffle the Deck"
+Toucan Card Game - Sprint #1 Consolidated
+User Stories Implemented:
+  1) Seat Players
+  2) Create & Shuffle Deck
+  3) Deal Cards
 
-Enhanced to ensure:
-  - If a user tries to shuffle before creating a deck, 
-    the code gracefully handles it with a kind message.
+Features:
+  - Two players can be 'seated' (is_active = True).
+  - A fresh deck of 52 cards can be created and shuffled.
+  - 7 cards are dealt to each active player, with leftover cards forming the 'Can' (stock).
+  - Friendly messages guide the user and handle errors (e.g., not enough cards).
 
-Note: Future stories (like dealing cards, scoring, etc.) can be added later.
+Note: Future sprints can streamline these steps or add GUI, AI, trick logic, scoring, etc.
 """
 
 import random
@@ -16,7 +19,7 @@ import random
 class Card:
     """
     Represents a single playing card with a suit and rank.
-    K is highest, A is lowest for this game’s logic.
+    For Toucan, K is highest, A is lowest.
     """
     def __init__(self, suit, rank):
         self.suit = suit
@@ -27,143 +30,157 @@ class Card:
 
 class Player:
     """
-    Represents a single player in the Toucan card game.
-    Each player has:
-      - player_id (int): Unique identifier (e.g., 1 or 2).
-      - is_active (bool): Whether the player is 'seated' in the game.
+    Holds:
+      - player_id (1 or 2)
+      - is_active (bool): whether the player has 'taken a seat'
+      - hand (list of Card): 7 cards after dealing
     """
-
     def __init__(self, player_id):
         self.player_id = player_id
         self.is_active = False
+        self.hand = []
 
     def __str__(self):
-        """
-        Returns a user-friendly status of the player.
-        """
         status = "ready to play" if self.is_active else "not yet seated"
-        return f"Player {self.player_id} is currently {status}"
+        return f"Player {self.player_id} is {status} with {len(self.hand)} card(s)."
 
 class Game:
     """
     Manages:
-      - Two Player objects (player1, player2)
-      - A deck of cards (list of Card objects)
-      - Logic to seat players, create a deck, and shuffle it.
+      - Two players (player1, player2)
+      - A deck (list of Card) which becomes the Can/stock after dealing
+      - Seating players, creating/shuffling deck, dealing cards
     """
 
     def __init__(self):
         self.player1 = Player(player_id=1)
         self.player2 = Player(player_id=2)
-        self.deck = []  # Will store Card objects once created
+        self.deck = []  # Will store 52 Card objects after creation
 
     def seat_player(self, choice):
         """
-        Lets the user become Player 1 or Player 2 if not active already.
-        Returns a friendly message about the result.
+        Seats Player 1 or Player 2 if not active. Returns a user-friendly message.
         """
         if choice == '1':
             if not self.player1.is_active:
                 self.player1.is_active = True
-                return "Awesome! Player 1 is now seated at the table."
+                return "Player 1 is now seated at the table."
             else:
-                return "Friendly reminder: Player 1 is already seated. Let's keep things rolling!"
+                return "Player 1 is already seated."
         elif choice == '2':
             if not self.player2.is_active:
                 self.player2.is_active = True
-                return "Fantastic! Player 2 has joined the table. Let the fun begin!"
+                return "Player 2 has joined the table."
             else:
-                return "Heads up: Player 2 is already seated. No worries, we're set!"
+                return "Player 2 is already seated."
         else:
-            # Shouldn't happen if we validate the input.
-            return "Something went wrong. Please choose '1' or '2'."
-
-    def get_active_players(self):
-        """
-        Returns a list of strings representing all players currently seated.
-        """
-        active = []
-        if self.player1.is_active:
-            active.append("Player 1")
-        if self.player2.is_active:
-            active.append("Player 2")
-        return active
+            return "Invalid choice for seating."
 
     def create_deck(self):
         """
-        Creates a fresh 52-card deck.
-        K is highest, A is lowest in rank order for this game.
+        Builds a fresh 52-card deck, K..A in each suit, stored in self.deck.
         """
         suits = ["Hearts", "Diamonds", "Clubs", "Spades"]
-        # Ranks: K down to A, with A as the lowest
         ranks = ["K", "Q", "J", "10", "9", "8", "7", "6", "5", "4", "3", "2", "A"]
-
         self.deck = [Card(suit, rank) for suit in suits for rank in ranks]
-        print("\nA fresh deck of 52 cards has been created! Ranks K..A, suits Hearts/Diamonds/Clubs/Spades.")
+        print("\nA fresh deck of 52 cards has been created (K down to A).")
 
     def shuffle_deck(self):
         """
-        Randomly shuffles the deck if it exists. 
-        Prints a friendly confirmation or warns if no deck is created.
+        Randomly shuffles self.deck, if it exists.
         """
         if not self.deck:
-            print("\nUh oh! There’s no deck to shuffle yet.")
-            print("Try creating one first by choosing option [3]!")
+            print("\nOops! There's no deck to shuffle. Please create one first.")
+            return
+        random.shuffle(self.deck)
+        print("\nShuffle complete! The deck is ready for dealing.")
+
+    def deal_cards(self):
+        """
+        Deals 7 cards to each active player, if enough cards are present.
+        Updates self.deck to become the stock ('Can') after dealing.
+        """
+        # Gather active players
+        active_players = []
+        if self.player1.is_active:
+            active_players.append(self.player1)
+        if self.player2.is_active:
+            active_players.append(self.player2)
+
+        if not active_players:
+            print("\nNo players to deal to! Please seat at least one player first.")
             return
 
-        random.shuffle(self.deck)
-        print("\nShuffling complete! The deck is now ready for dealing (in a future step).")
+        needed = 7 * len(active_players)
+        if len(self.deck) < needed:
+            print(f"\nNot enough cards to deal. Need {needed}, have {len(self.deck)}.")
+            print("Please create & shuffle a proper deck first.")
+            return
+
+        # Clear old hands (in case of multiple rounds)
+        for player in active_players:
+            player.hand.clear()
+
+        # Deal 7 cards each
+        for player in active_players:
+            for _ in range(7):
+                card = self.deck.pop()
+                player.hand.append(card)
+
+        print(f"\nDealing complete! Each active player received 7 cards.")
+        print(f"{len(self.deck)} cards remain in the 'Can' (stock).")
+        print("The game is now ready to proceed to the play phase!")
+
+    def show_player_status(self):
+        """
+        Displays current status of Player 1 and Player 2 (hand size, seating).
+        """
+        print("\n---- Current Player Status ----")
+        print(self.player1)
+        print(self.player2)
+        print("--------------------------------")
 
 def main():
-    """
-    Main program flow (console-based):
-      1. Players can seat themselves (User Story #001).
-      2. We can create a deck and shuffle it (User Story #002).
-      3. If user tries to shuffle an empty deck, we kindly remind them to create one first.
-    """
     game = Game()
 
-    print("Welcome to Toucan (Console Version)!")
-    print("Get ready for a lighthearted card-flinging adventure!\n")
+    print("=== Welcome to Toucan (Sprint #1) ===")
+    print("This console-based version demonstrates seating players, creating/shuffling a deck, and dealing cards.")
 
     while True:
         print("\nMain Menu:")
-        print("  [1] Take a Seat as Player 1")
-        print("  [2] Take a Seat as Player 2")
-        print("  [3] Create a Fresh Deck")
+        print("  [1] Seat Player 1")
+        print("  [2] Seat Player 2")
+        print("  [3] Create a Fresh Deck (52 cards)")
         print("  [4] Shuffle the Deck")
-        print("  [Q] Quit (Hope you can join us another time!)")
+        print("  [5] Deal Cards (7 each to active players)")
+        print("  [6] Show Player Status")
+        print("  [Q] Quit")
 
-        user_input = input("Your choice: ").strip()
+        choice = input("Please select an option: ").strip().lower()
 
-        if user_input.lower() == 'q':
-            print("\nNo worries—thanks for stopping by! See you next time!")
+        if choice == 'q':
+            print("\nThanks for playing! Goodbye.")
             break
-
-        elif user_input in ('1', '2'):
-            result = game.seat_player(user_input)
-            print(f"\n{result}")
-
-            active_players = game.get_active_players()
-            if active_players:
-                print("Currently seated player(s):", ", ".join(active_players))
-            else:
-                print("No one is seated at the table yet.")
-
-        elif user_input == '3':
+        elif choice == '1':
+            result = game.seat_player(choice='1')
+            print("\n" + result)
+        elif choice == '2':
+            result = game.seat_player(choice='2')
+            print("\n" + result)
+        elif choice == '3':
             game.create_deck()
-
-        elif user_input == '4':
+        elif choice == '4':
             game.shuffle_deck()
-
+        elif choice == '5':
+            game.deal_cards()
+        elif choice == '6':
+            game.show_player_status()
         else:
-            print("\nThat choice doesn't ring a bell.")
-            print("Try '1', '2', '3', '4', or 'Q' to quit. You'll get the hang of it!")
+            print("\nInvalid choice. Please try again.")
 
 if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        print("\nOh no! An unexpected error occurred.")
-        print("Please let the developer know or try again.")
-        print("Error details:", str(e))
+        print("\nAn unexpected error occurred. Please report the following:")
+        print(str(e))
